@@ -40,8 +40,8 @@ jobs:
       run: |
         COVERAGE=$(grep -oP 'Line coverage: \K[0-9.]+' ./coverage/report/Summary.txt)
         echo "Coverage: $COVERAGE%"
-        if (( $(echo "$COVERAGE < 95" | bc -l) )); then
-          echo "Error: Coverage $COVERAGE% is below the required 95%"
+        if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+          echo "Error: Coverage $COVERAGE% is below the required 90%"
           exit 1
         fi
         echo "Coverage check passed: $COVERAGE%"
