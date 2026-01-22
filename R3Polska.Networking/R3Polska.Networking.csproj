@@ -8,17 +8,18 @@
         <!-- NuGet Package Metadata -->
         <PackageId>R3Polska.Networking</PackageId>
         <Version>1.0.0</Version>
-        <Authors>R3</Authors>
-        <Company>R3</Company>
+        <Authors>IDCT Bartosz Pachołek (bartosz+github@idct.tech); R3 Polska sp. z o.o.</Authors>
+        <Company>R3 Polska sp. z o.o.</Company>
         <Description>Network helper utilities for retrieving MAC addresses and local IP addresses. Supports Docker volume mapping for consistent hardware identification in containerized environments.</Description>
         <PackageTags>networking;mac-address;ip-address;docker;hardware-id</PackageTags>
-        <RepositoryUrl>https://github.com/bartosz/r3-network-helper</RepositoryUrl>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/recomaty/network-helper/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/recomaty/network-helper/</RepositoryUrl>
+        <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="R3.Networking.Tests" />
+        <InternalsVisibleTo Include="R3Polska.Networking.Tests" />
     </ItemGroup>
     
     <ItemGroup>

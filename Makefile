@@ -20,7 +20,7 @@ coverage-html: coverage
 
 # Create NuGet package
 pack:
-	dotnet pack R3.Networking/R3.Networking.csproj --configuration Release --output ./nupkg
+	dotnet pack R3Polska.Networking/R3Polska.Networking.csproj --configuration Release --output ./nupkg
 	@echo "NuGet package created in ./nupkg directory"
 
 # Clean test results and reports

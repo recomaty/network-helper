@@ -20,7 +20,7 @@ dotnet add package R3.Networking
 ### Get MAC Address
 
 ```csharp
-using R3.Networking;
+using R3Polska.Networking;
 
 // Get MAC address (checks Docker volumes first, then system)
 string macAddress = NetworkHelper.GetRealMacAddress();
@@ -37,7 +37,7 @@ The method searches for MAC addresses in the following order:
 ### Get Local IP for Network
 
 ```csharp
-using R3.Networking;
+using R3Polska.Networking;
 
 // Get local IP that would be used to reach Google DNS
 string localIp = NetworkHelper.GetLocalIpForNetwork("8.8.8.8");
