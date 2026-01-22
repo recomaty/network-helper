@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.RegularExpressions;
-using FluentAssertions;
+using Shouldly;
 
 namespace R3.Networking.Tests;
 
@@ -139,7 +139,7 @@ public class NetworkHelperTests : IDisposable
         var result = NetworkHelper.GetRealMacAddress();
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
+        result.ShouldNotBeNullOrEmpty();
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public class NetworkHelperTests : IDisposable
         var isValidFormat = Regex.IsMatch(result, colonSeparatedPattern) ||
                            Regex.IsMatch(result, continuousPattern);
 
-        isValidFormat.Should().BeTrue($"MAC address '{result}' should match standard formats");
+        isValidFormat.ShouldBeTrue($"MAC address '{result}' should match standard formats");
     }
 
     [Fact]
@@ -169,8 +169,8 @@ public class NetworkHelperTests : IDisposable
         var result3 = NetworkHelper.GetRealMacAddress();
 
         // Assert - Should return the same value
-        result1.Should().Be(result2);
-        result2.Should().Be(result3);
+        result1.ShouldBe(result2);
+        result2.ShouldBe(result3);
     }
 
     [Theory]
@@ -185,7 +185,7 @@ public class NetworkHelperTests : IDisposable
         var result = NetworkHelper.GetLocalIpForNetwork(targetIp);
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
+        result.ShouldNotBeNullOrEmpty();
     }
 
     [Theory]
@@ -198,9 +198,9 @@ public class NetworkHelperTests : IDisposable
         var result = NetworkHelper.GetLocalIpForNetwork(targetIp);
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
-        IPAddress.TryParse(result, out var ipAddress).Should().BeTrue($"'{result}' should be a valid IP address");
-        ipAddress!.AddressFamily.Should().Be(System.Net.Sockets.AddressFamily.InterNetwork);
+        result.ShouldNotBeNullOrEmpty();
+        IPAddress.TryParse(result, out var ipAddress).ShouldBeTrue($"'{result}' should be a valid IP address");
+        ipAddress!.AddressFamily.ShouldBe(System.Net.Sockets.AddressFamily.InterNetwork);
     }
 
     [Fact]
@@ -210,8 +210,8 @@ public class NetworkHelperTests : IDisposable
         var result = NetworkHelper.GetLocalIpForNetwork();
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
-        IPAddress.TryParse(result, out _).Should().BeTrue($"'{result}' should be a valid IP address");
+        result.ShouldNotBeNullOrEmpty();
+        IPAddress.TryParse(result, out _).ShouldBeTrue($"'{result}' should be a valid IP address");
     }
 
     [Theory]
@@ -223,8 +223,8 @@ public class NetworkHelperTests : IDisposable
         var result = NetworkHelper.GetLocalIpForNetwork(targetIp);
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
-        result.Should().NotBe("127.0.0.1", "should return actual network interface IP, not loopback");
+        result.ShouldNotBeNullOrEmpty();
+        result.ShouldNotBe("127.0.0.1");
     }
 
     [Theory]
@@ -237,7 +237,7 @@ public class NetworkHelperTests : IDisposable
         var result = NetworkHelper.GetLocalIpForNetwork(targetIp);
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
+        result.ShouldNotBeNullOrEmpty();
 
         if (IPAddress.TryParse(result, out var ipAddress))
         {
@@ -250,7 +250,7 @@ public class NetworkHelperTests : IDisposable
 
             // For private target IPs, we expect to get a private IP back
             // (This assumes the test machine has private network connectivity)
-            isPrivate.Should().BeTrue($"When targeting private network {targetIp}, should return a private IP, got {result}");
+            isPrivate.ShouldBeTrue($"When targeting private network {targetIp}, should return a private IP, got {result}");
         }
     }
 
@@ -266,8 +266,8 @@ public class NetworkHelperTests : IDisposable
         var result3 = NetworkHelper.GetLocalIpForNetwork(targetIp);
 
         // Assert
-        result1.Should().Be(result2);
-        result2.Should().Be(result3);
+        result1.ShouldBe(result2);
+        result2.ShouldBe(result3);
     }
 
     [Theory]
@@ -277,26 +277,22 @@ public class NetworkHelperTests : IDisposable
     public void GetLocalIpForNetwork_WithInvalidIpAddress_ShouldThrow(string invalidIp)
     {
         // Act & Assert
-        var action = () => NetworkHelper.GetLocalIpForNetwork(invalidIp);
-        action.Should().Throw<Exception>();
+        Should.Throw<Exception>(() => NetworkHelper.GetLocalIpForNetwork(invalidIp));
     }
 
     [Fact]
     public void GetLocalIpForNetwork_WithEmptyString_ShouldThrowOrReturnNull()
     {
         // Act & Assert - Empty string may behave differently depending on socket implementation
-        var action = () => NetworkHelper.GetLocalIpForNetwork("");
-
+        // Both throwing and returning null/valid IP are acceptable behaviors
         try
         {
-            var result = action();
-            // If it doesn't throw, result could be null or a valid IP
-            // Both behaviors are acceptable
+            var result = NetworkHelper.GetLocalIpForNetwork("");
+            // If it doesn't throw, result could be null or a valid IP - both acceptable
         }
         catch (Exception)
         {
             // Throwing is also acceptable behavior
-            true.Should().BeTrue();
         }
     }
 }
