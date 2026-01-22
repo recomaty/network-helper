@@ -4,10 +4,25 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        
+        <!-- NuGet Package Metadata -->
+        <PackageId>R3Polska.Networking</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>R3</Authors>
+        <Company>R3</Company>
+        <Description>Network helper utilities for retrieving MAC addresses and local IP addresses. Supports Docker volume mapping for consistent hardware identification in containerized environments.</Description>
+        <PackageTags>networking;mac-address;ip-address;docker;hardware-id</PackageTags>
+        <RepositoryUrl>https://github.com/bartosz/r3-network-helper</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="R3.Networking.Tests" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\README.md')" />
     </ItemGroup>
 
 </Project>

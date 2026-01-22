@@ -4,9 +4,9 @@ using System.Net.Sockets;
 
 namespace R3.Networking;
 /// <summary>
-/// Próbuje pobrać adres MAC urządzenia w celu identyfikacji sprzętowej.
-/// Uwaga: Priorytetyzuje ścieżki folderu `/hw`, aby umożliwić mapowanie/przypisanie przez woluminy Dockera.
-/// Umożliwia to spójne pobieranie ID sprzętowego w środowiskach kontenerowych.
+/// Provides methods to retrieve device hardware identifiers for identification purposes.
+/// Note: Prioritizes `/hw` folder paths to enable mapping/assignment through Docker volumes,
+/// enabling consistent hardware ID retrieval in containerized environments.
 /// </summary>
 public static class NetworkHelper
 {
@@ -17,80 +17,81 @@ public static class NetworkHelper
         NetworkInterface.GetAllNetworkInterfaces;
 
     /// <summary>
-    /// Zapewnia mechanizm zastępczy do pobierania adresu MAC przy użyciu API systemu.
-    /// Ta metoda jest szczególnie przydatna w systemach Windows lub gdy pobieranie
-    /// z pliku nie powiedzie się. Przeszukuje wszystkie interfejsy sieciowe i zwraca
-    /// adres MAC pierwszego aktywnego interfejsu fizycznego.
+    /// Provides a fallback mechanism to retrieve the MAC address using the system API.
+    /// This method is particularly useful on Windows systems or when file-based retrieval fails.
+    /// It scans all network interfaces and returns the MAC address of the first active physical interface.
     /// </summary>
-    /// <returns>Ciąg znaków z adresem MAC jeśli znaleziono, null jeśli brak odpowiedniego interfejsu</returns>
+    /// <returns>A string containing the MAC address if found; null if no suitable interface is available.</returns>
     internal static string? GetMacFromSystem()
     {
-        // Iteruj przez wszystkie interfejsy sieciowe dostępne w systemie
+        // Iterate through all network interfaces available on the system
         foreach (NetworkInterface nic in NetworkInterfaceProvider())
         {
-            // Rozważ tylko interfejsy, które są obecnie operacyjne
-            // Wyklucz interfejsy wirtualne i pseudo, aby uzyskać prawdziwe adresy MAC sprzętowe
+            // Consider only interfaces that are currently operational
+            // Exclude virtual and pseudo interfaces to get genuine hardware MAC addresses
             if (nic.OperationalStatus != OperationalStatus.Up ||
                 (nic.Description.Contains("Virtual") || nic.Description.Contains("Pseudo"))) continue;
-            // Sprawdź, czy interfejs ma prawidłowy adres fizyczny
+            // Check if the interface has a valid physical address
             if (nic.GetPhysicalAddress().ToString() != "")
             {
                 return nic.GetPhysicalAddress().ToString();
             }
         }
 
-        // Zwróć null jeśli nie znaleziono odpowiedniego interfejsu
+        // Return null if no suitable interface was found
         return null;
     }
 
 
     /// <summary>
-    /// Pobiera adres MAC z systemu przy użyciu podejścia hierarchicznego.
-    /// Najpierw próbuje odczytać z predefiniowanych ścieżek plików (priorytetyzując woluminy mapowane przez Dockera),
-    /// następnie wraca do API systemu, jeśli pobieranie z pliku nie powiedzie się.
+    /// Retrieves the MAC address from the system using a hierarchical approach.
+    /// First attempts to read from predefined file paths (prioritizing Docker-mapped volumes),
+    /// then falls back to the system API if file-based retrieval fails.
     /// </summary>
-    /// <returns>Ciąg znaków z adresem MAC</returns>
-    /// <exception cref="Exception">Zgłaszany, gdy adres MAC nie może zostać pobrany z żadnego źródła</exception>
+    /// <param name="overridePaths">Optional custom file paths to check for MAC address. If not provided, uses default paths.</param>
+    /// <returns>A string containing the MAC address.</returns>
+    /// <exception cref="Exception">Thrown when the MAC address cannot be retrieved from any source.</exception>
     public static string GetRealMacAddress(params string[] overridePaths)
     {
-        // Zdefiniuj ścieżki uporządkowane według priorytetu do pobierania adresu MAC
-        // Ścieżki /hw/ są przeznaczone do scenariuszy mapowania woluminów Dockera
-        // Ścieżki /sys/ to standardowe lokalizacje interfejsów sieciowych Linuksa
+        // Define paths ordered by priority for MAC address retrieval
+        // /hw/ paths are intended for Docker volume mapping scenarios
+        // /sys/ paths are standard Linux network interface locations
         var paths = overridePaths.Length > 0 ? overridePaths :
         [
-            "/hw/class/net/enp1s0/address",    // Interfejs Ethernet 1 mapowany przez Dockera, nowy format
-            "/hw/class/net/eno1/address",    // Interfejs Ethernet 1 mapowany przez Dockera
-            "/hw/class/net/eth0/address",    // Interfejs Ethernet 0 mapowany przez Dockera
-            "/hw/class/net/eth1/address",    // Interfejs Ethernet 1 mapowany przez Dockera (alternatywny)
-            "/sys/class/net/enp1s0/address",   // Systemowy interfejs Ethernet 1, nowy format
-            "/sys/class/net/eno1/address",   // Systemowy interfejs Ethernet 1
-            "/sys/class/net/eth0/address",   // Systemowy interfejs Ethernet 0
-            "/sys/class/net/eth1/address" // Systemowy interfejs Ethernet 1 (alternatywny)
+            "/hw/class/net/enp1s0/address",    // Docker-mapped Ethernet interface 1, new naming format
+            "/hw/class/net/eno1/address",      // Docker-mapped Ethernet interface 1
+            "/hw/class/net/eth0/address",      // Docker-mapped Ethernet interface 0
+            "/hw/class/net/eth1/address",      // Docker-mapped Ethernet interface 1 (alternative)
+            "/sys/class/net/enp1s0/address",   // System Ethernet interface 1, new naming format
+            "/sys/class/net/eno1/address",     // System Ethernet interface 1
+            "/sys/class/net/eth0/address",     // System Ethernet interface 0
+            "/sys/class/net/eth1/address"      // System Ethernet interface 1 (alternative)
         ];
 
-        // Próbuj odczytać adres MAC z każdej ścieżki pliku po kolei
+        // Try reading the MAC address from each file path in sequence
         foreach (var path in paths)
         {
             if (!File.Exists(path)) continue;
             using var reader = new StreamReader(path);
-            // Odczytaj adres MAC i usuń wszelkie białe znaki/nowe linie
+            // Read the MAC address and remove any whitespace/newlines
             var macAddress = reader.ReadToEnd().Trim();
 
             return macAddress;
         }
 
-        // Jeśli pobieranie z pliku nie powiedzie się, spróbuj zastępczego API systemu
+        // If file-based retrieval fails, attempt fallback system API
         var mac = GetMacFromSystem();
         return mac ?? throw
-            // Zgłoś wyjątek, jeśli wszystkie metody pobierania zawiodą
-            new Exception("Nie można pobrać identyfikatora adresu MAC. Nie można kontynuować operacji.");
+            // Throw an exception if all retrieval methods fail
+            new Exception("Unable to retrieve MAC address identifier. Cannot continue operation.");
     }
     
     /// <summary>
-    /// Emuluje ip route get w celu uzyskania adresu IP interfejsu docelowego. Nie wysyła żadnych danych przez sieć.
+    /// Emulates 'ip route get' to determine the local IP address that would be used to reach the target IP.
+    /// Does not send any data over the network - uses socket connection to determine routing.
     /// </summary>
-    /// <param name="targetIp">Adres IP, z którego sprawdzić</param>
-    /// <returns></returns>
+    /// <param name="targetIp">The target IP address to check routing for. Defaults to a private network address.</param>
+    /// <returns>The local IP address string that would be used to reach the target, or null if unable to determine.</returns>
     public static string? GetLocalIpForNetwork(string targetIp = "10.8.0.1")
     {
         using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);

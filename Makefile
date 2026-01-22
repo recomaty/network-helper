@@ -1,4 +1,4 @@
-.PHONY: test coverage coverage-html clean prepare-test
+.PHONY: test coverage coverage-html clean prepare-test pack
 
 # Install required tools for coverage reports
 prepare-test:
@@ -18,6 +18,11 @@ coverage-html: coverage
 	dotnet reportgenerator -reports:"./TestResults/**/coverage.cobertura.xml" -targetdir:"./coveragereport" -reporttypes:Html
 	@echo "Coverage report generated at coveragereport/index.html"
 
+# Create NuGet package
+pack:
+	dotnet pack R3.Networking/R3.Networking.csproj --configuration Release --output ./nupkg
+	@echo "NuGet package created in ./nupkg directory"
+
 # Clean test results and reports
 clean:
-	rm -rf ./TestResults ./coveragereport
+	rm -rf ./TestResults ./coveragereport ./nupkg
