@@ -1,4 +1,9 @@
-# R3.Networking
+# R3Polska.Networking
+
+[![CI](https://github.com/recomaty/network-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/recomaty/network-helper/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/recomaty/network-helper/branch/main/graph/badge.svg)](https://codecov.io/gh/recomaty/network-helper)
+[![NuGet](https://img.shields.io/nuget/v/R3Polska.Networking.svg)](https://www.nuget.org/packages/R3Polska.Networking/)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](./LICENSE)
 
 Network helper utilities for retrieving MAC addresses and local IP addresses with support for Docker containerized environments.
 
@@ -12,7 +17,7 @@ Network helper utilities for retrieving MAC addresses and local IP addresses wit
 ## Installation
 
 ```bash
-dotnet add package R3.Networking
+dotnet add package R3Polska.Networking
 ```
 
 ## Usage
