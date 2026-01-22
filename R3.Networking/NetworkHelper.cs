@@ -11,16 +11,22 @@ namespace R3.Networking;
 public static class NetworkHelper
 {
     /// <summary>
+    /// Provider for network interfaces. Can be replaced in tests for mocking.
+    /// </summary>
+    internal static Func<NetworkInterface[]> NetworkInterfaceProvider { get; set; } = 
+        NetworkInterface.GetAllNetworkInterfaces;
+
+    /// <summary>
     /// Zapewnia mechanizm zastępczy do pobierania adresu MAC przy użyciu API systemu.
     /// Ta metoda jest szczególnie przydatna w systemach Windows lub gdy pobieranie
     /// z pliku nie powiedzie się. Przeszukuje wszystkie interfejsy sieciowe i zwraca
     /// adres MAC pierwszego aktywnego interfejsu fizycznego.
     /// </summary>
     /// <returns>Ciąg znaków z adresem MAC jeśli znaleziono, null jeśli brak odpowiedniego interfejsu</returns>
-    private static string? GetMacFromSystem()
+    internal static string? GetMacFromSystem()
     {
         // Iteruj przez wszystkie interfejsy sieciowe dostępne w systemie
-        foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+        foreach (NetworkInterface nic in NetworkInterfaceProvider())
         {
             // Rozważ tylko interfejsy, które są obecnie operacyjne
             // Wyklucz interfejsy wirtualne i pseudo, aby uzyskać prawdziwe adresy MAC sprzętowe

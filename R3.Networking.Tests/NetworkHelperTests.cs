@@ -295,4 +295,60 @@ public class NetworkHelperTests : IDisposable
             // Throwing is also acceptable behavior
         }
     }
+
+    #region GetMacFromSystem Tests with Mocking
+
+    [Fact]
+    public void GetMacFromSystem_WithNoInterfaces_ReturnsNull()
+    {
+        // Arrange
+        var originalProvider = NetworkHelper.NetworkInterfaceProvider;
+        try
+        {
+            NetworkHelper.NetworkInterfaceProvider = () => [];
+
+            // Act
+            var result = NetworkHelper.GetMacFromSystem();
+
+            // Assert
+            result.ShouldBeNull();
+        }
+        finally
+        {
+            NetworkHelper.NetworkInterfaceProvider = originalProvider;
+        }
+    }
+
+    [Fact]
+    public void GetRealMacAddress_WhenNoInterfacesAndNoFiles_ThrowsException()
+    {
+        // Arrange
+        var originalProvider = NetworkHelper.NetworkInterfaceProvider;
+        try
+        {
+            NetworkHelper.NetworkInterfaceProvider = () => [];
+
+            // Act & Assert
+            Should.Throw<Exception>(() => NetworkHelper.GetRealMacAddress("/nonexistent/path"));
+        }
+        finally
+        {
+            NetworkHelper.NetworkInterfaceProvider = originalProvider;
+        }
+    }
+
+    [Fact]
+    public void GetRealMacAddress_WithEmptyFileContent_ReturnsEmptyString()
+    {
+        // Arrange
+        var tempFile = CreateTempFileWithContent("");
+
+        // Act
+        var result = NetworkHelper.GetRealMacAddress(tempFile);
+
+        // Assert
+        result.ShouldBe("");
+    }
+
+    #endregion
 }
